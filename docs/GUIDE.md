@@ -23,13 +23,12 @@ format. You still need to understand the ViT theory (3.3): every member can be a
 | Record hardware, training time, parameter count | Rule 4.2 | `metrics.json` |
 | Regular Git commits, README, requirements, one config per experiment | Rule 4.3 | Whole repo |
 | Credit public code; state what you wrote or modified | Rule 4.3 | README |
-| Declare AI use; every member can explain the code and formulas | Rule 4.4 | `docs/AI_USAGE.md` |
+| Declare AI use; every member can explain the code and formulas | Rule 4.4 | Report appendix |
 | *Extension:* CIFAR-10-C robustness or shape/texture bias | Topic 7, extension | Milestone 7 |
 | *Bonus (+1):* improvement or new application | Rule 4.1, step 6 | Milestone 7 |
 
 **Administrative steps:** register 2 topic preferences early (each topic takes at most 2
-teams, first come, first served), then submit the 1-2 page proposal by the end of week 1
-(`docs/PROPOSAL_TEMPLATE.md`).
+teams, first come, first served), then submit the 1-2 page proposal by the end of week 1.
 
 ## 2. Recommended experimental design
 

@@ -27,7 +27,7 @@ configs/   One YAML config per experiment, inheriting from base.yaml
 src/       Data pipeline, models, training loop, interpretation
 scripts/   Command-line entry points
 tests/     Data pipeline tests
-docs/      AI usage log and project documents
+docs/      Project documents
 results/   Final tables and figures (committed)
 data/      Datasets (downloaded, not committed)
 outputs/   Per-run logs and checkpoints (not committed)
@@ -48,8 +48,6 @@ TODO: main table (mean ± std over 3 seeds) and hardware used.
 | [timm](https://github.com/huggingface/pytorch-image-models) | Pretrained models | TODO |
 
 TODO: list every other public source, and state clearly which parts the team wrote or modified.
-
-AI tool use is declared in [docs/AI_USAGE.md](docs/AI_USAGE.md).
 
 ## References
 

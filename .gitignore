@@ -24,6 +24,11 @@ outputs/*
 # Course material
 ML-Assignment-Topics-EN.pdf
 
+# Private documents (kept locally only)
+docs/AI_USAGE.md
+docs/PROPOSAL_TEMPLATE.md
+docs/proposal/
+
 # LaTeX build files
 *.aux
 *.bbl
