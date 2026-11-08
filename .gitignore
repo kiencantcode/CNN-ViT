@@ -25,9 +25,7 @@ outputs/*
 ML-Assignment-Topics-EN.pdf
 
 # Private documents (kept locally only)
-docs/AI_USAGE.md
-docs/PROPOSAL_TEMPLATE.md
-docs/proposal/
+docs/
 
 # LaTeX build files
 *.aux

@@ -27,7 +27,6 @@ configs/   One YAML config per experiment, inheriting from base.yaml
 src/       Data pipeline, models, training loop, interpretation
 scripts/   Command-line entry points
 tests/     Data pipeline tests
-docs/      Project documents
 results/   Final tables and figures (committed)
 data/      Datasets (downloaded, not committed)
 outputs/   Per-run logs and checkpoints (not committed)
