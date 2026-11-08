@@ -1,0 +1,5 @@
+inherit: base.yaml
+experiment: convnext_tiny_finetune
+model:
+  name: convnext_tiny.fb_in1k
+  pretrained: true

@@ -1,0 +1,11 @@
+inherit: base.yaml
+experiment: small_cnn_scratch
+data:
+  image_size: 32
+model:
+  name: small_cnn
+  pretrained: false
+train:
+  epochs: 60
+  lr_head: 1.0e-3
+  lr_backbone: 1.0e-3

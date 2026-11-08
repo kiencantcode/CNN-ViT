@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+venv/
+
+# Datasets (downloaded, never committed)
+data/*
+!data/.gitkeep
+
+# Training outputs. Checkpoints and logs stay local.
+outputs/*
+!outputs/.gitkeep
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Final figures and summary tables ARE committed: results/
+# (per-run raw files stay in outputs/)
+
+# Course material
+ML-Assignment-Topics-EN.pdf
+
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Editor / OS
+.vscode/
+.idea/
+.claude/
+Thumbs.db
+desktop.ini
+.DS_Store

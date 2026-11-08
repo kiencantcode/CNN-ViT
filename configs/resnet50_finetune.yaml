@@ -1,0 +1,5 @@
+inherit: base.yaml
+experiment: resnet50_finetune
+model:
+  name: resnet50.a1_in1k
+  pretrained: true

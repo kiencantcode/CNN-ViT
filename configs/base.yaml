@@ -1,0 +1,28 @@
+seed: 42
+output_dir: outputs
+
+data:
+  name: cifar10
+  root: data
+  image_size: 224
+  val_fraction: 0.1
+  train_fraction: 1.0
+  augmentation: basic
+  num_workers: 4
+
+model:
+  name: null
+  pretrained: true
+  freeze_backbone: false
+
+train:
+  epochs: 8
+  batch_size: 32
+  optimizer: adamw
+  lr_head: 1.0e-3
+  lr_backbone: 1.0e-4
+  weight_decay: 0.05
+  warmup_epochs: 1
+  label_smoothing: 0.0
+  amp: true
+  grad_accum_steps: 1

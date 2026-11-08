@@ -1,0 +1,169 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\setlist{nosep, leftmargin=*}
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+
+\title{\vspace{-1.6cm}\textbf{Project Proposal}\\[2pt]
+\large CNN vs Vision Transformer for Image Classification:\\
+Inductive Bias, Dataset Size, Augmentation and Compute Cost}
+\author{Machine Learning and Applications --- Topic 7\\
+[Member 1 name, student ID] (team leader)\quad [Member 2 name, student ID]}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-1.2cm}
+
+\section{Problem and Research Questions}
+Convolutional neural networks (CNNs) build in strong assumptions about images: locality and
+weight sharing, which give translation equivariance~\cite{he2016resnet}. Vision Transformers
+(ViTs) treat an image as a sequence of patches and rely on global self-attention, with far weaker
+built-in assumptions~\cite{dosovitskiy2021vit}. Dosovitskiy et al.\ report that ViTs trail
+comparable ResNets when pretrained on ImageNet-1k alone but match or exceed them with larger
+pretraining datasets, suggesting that weak inductive bias must be compensated by data.
+Later work shows that the gap also depends on training recipe and augmentation~\cite{touvron2021deit,
+steiner2022howtotrain}, that modernised CNNs can match ViTs~\cite{liu2022convnext}, and that the
+two families learn different internal representations~\cite{raghu2021vitsee}.
+We study these claims in a controlled, small-scale setting on CIFAR-10~\cite{krizhevsky2009cifar}:
+\begin{enumerate}
+  \item[\textbf{RQ1}] \textbf{Dataset size:} how does accuracy change as the training set shrinks
+  from 100\% to 1\%, for pretrained and from-scratch CNNs and ViTs?
+  \item[\textbf{RQ2}] \textbf{Augmentation:} which family benefits more from stronger augmentation?
+  \item[\textbf{RQ3}] \textbf{Compute cost:} how do the models compare in accuracy per training
+  time, GPU memory and number of parameters?
+  \item[\textbf{RQ4}] \textbf{Interpretation:} do Grad-CAM~\cite{selvaraju2017gradcam} and attention
+  rollout~\cite{abnar2020rollout} maps show different evidence used by each family?
+\end{enumerate}
+\textbf{Hypothesis.} Trained from scratch, CNNs should outperform a ViT of similar size on small
+training fractions, and the gap should narrow as data grows. Pretraining should reduce this gap,
+and ViTs should gain more from strong augmentation.
+
+\section{Main Papers and Methods}
+We reproduce the core comparison of ViT~\cite{dosovitskiy2021vit} against ResNet~\cite{he2016resnet}
+and ConvNeXt~\cite{liu2022convnext}. ResNet learns residual mappings
+$y = \mathcal{F}(x,\{W_i\}) + x$; ViT applies self-attention
+$\mathrm{softmax}(QK^\top/\sqrt{d_k})V$ over patch embeddings plus learned position embeddings.
+Pretrained models come from timm~\cite{wightman2019timm}, using ImageNet-1k weights for all models
+(ResNet-50 trained with the recipe of~\cite{wightman2021resnetstrikes}, ViT-S/16
+from~\cite{steiner2022howtotrain}) so that pretraining data is the same across families.
+
+\begin{tabularx}{\linewidth}{@{}lllXr@{}}
+\toprule
+\textbf{Track} & \textbf{Model} & \textbf{Weights} & \textbf{Input} & \textbf{Params} \\
+\midrule
+Fine-tune & ResNet-50 & ImageNet-1k & $224\times224$ (upscaled) & 23.5M \\
+Fine-tune & ConvNeXt-Tiny & ImageNet-1k & $224\times224$ (upscaled) & 27.8M \\
+Fine-tune & ViT-S/16 & ImageNet-1k & $224\times224$ (upscaled) & 21.7M \\
+Scratch & SmallCNN (own) & random & $32\times32$ (native) & TBD \\
+Scratch & SmallViT (own, $4\times4$ patches) & random & $32\times32$ (native) & matched to SmallCNN \\
+\bottomrule
+\end{tabularx}
+\vspace{2pt}
+
+\textbf{Baseline.} Logistic regression on raw pixels checks the data pipeline and gives a reference.
+
+\textbf{Training.} AdamW~\cite{loshchilov2019adamw} (weight decay 0.05), one warmup epoch then cosine
+decay~\cite{loshchilov2017sgdr}, batch size 32 and mixed precision. Fine-tuning starts from learning
+rates $10^{-3}$ (new head) and $10^{-4}$ (backbone) for 8 epochs; scratch models use $10^{-3}$ for
+60 epochs. Every model receives the same tuning budget on the validation set, and the search space
+will be reported. Augmentation levels: none; basic (random crop, horizontal flip); strong
+(adding RandAugment~\cite{cubuk2020randaugment}).
+
+\section{Data, Experiments and Metrics}
+\textbf{Data.} CIFAR-10~\cite{krizhevsky2009cifar}: 50,000 training and 10,000 test images in 10
+classes. A stratified 10\% of the training set is held out for validation; the test set is used
+once per model, after model selection on validation.
+
+\textbf{Experiments.}
+\begin{itemize}
+  \item \textbf{Learning curves (RQ1):} training fractions 1, 5, 10, 25, 50, 100\%, using
+  stratified, nested subsets; 5 models $\times$ 6 fractions $\times$ 3 seeds.
+  \item \textbf{Augmentation (RQ2):} none / basic / strong at fixed training fractions.
+  \item \textbf{Ablations:} pretrained vs random initialisation (ResNet-50, ViT-S/16); frozen
+  backbone (linear probe) vs full fine-tuning.
+  \item \textbf{Interpretation (RQ4):} Grad-CAM for CNNs and attention rollout for ViTs, on one
+  shared set of correctly and incorrectly classified test images.
+  \item \textbf{Extension (if time allows):} robustness on CIFAR-10-C~\cite{hendrycks2019robustness}
+  and shape/texture bias~\cite{geirhos2019texture}.
+\end{itemize}
+
+\textbf{Metrics.} Test accuracy and macro-F1 as mean $\pm$ std over seeds 0, 1, 2; training time;
+peak GPU memory; parameter count.
+
+\section{Task Allocation}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Member} & \textbf{Responsibilities} \\
+\midrule
+[Member 1] & CNN track: ResNet-50 and ConvNeXt-Tiny fine-tuning, SmallCNN, Grad-CAM; shared data
+pipeline and training loop. \\
+[Member 2] & ViT track: ViT-S/16 fine-tuning, SmallViT, attention rollout. \\
+Both & Logistic regression baseline, literature review, result analysis, report and presentation. \\
+\bottomrule
+\end{tabularx}
+
+\section{Compute Resources and Timeline}
+Development uses a laptop with an NVIDIA RTX 3050 Ti (4 GB), PyTorch 2.11 and timm 1.0.31. A
+preliminary benchmark at $224\times224$ with batch size 32 measured 174 (ResNet-50), 134
+(ConvNeXt-Tiny) and 247 (ViT-S/16) training images per second, about 3--6 minutes per epoch on
+the full training split. The full learning-curve grid is estimated at roughly 3--4 GPU hours per
+pretrained model, before tuning; Kaggle or Colab GPUs serve as a fallback, and the hardware will be
+recorded for every run. Code is versioned on GitHub.
+
+\textbf{Timeline.} Week 1: proposal. Weeks 2--3: literature review, data pipeline, baseline
+(progress report). Weeks 4--6: fine-tuning, scratch models, learning curves, ablations.
+Weeks 7--8: interpretation, report and presentation.
+
+\textbf{Expected limitations.} Upscaled $32\times32$ images carry little fine detail; pretrained
+and scratch models use different resolutions; and our small scale cannot reproduce the large
+pretraining regime of~\cite{dosovitskiy2021vit}.
+
+\small
+\begin{thebibliography}{99}
+\setlength{\itemsep}{0pt}
+\bibitem{he2016resnet} K.~He, X.~Zhang, S.~Ren, J.~Sun. Deep Residual Learning for Image
+Recognition. \emph{CVPR}, 2016. arXiv:1512.03385.
+\bibitem{dosovitskiy2021vit} A.~Dosovitskiy et al. An Image is Worth 16x16 Words: Transformers for
+Image Recognition at Scale. \emph{ICLR}, 2021. arXiv:2010.11929.
+\bibitem{liu2022convnext} Z.~Liu, H.~Mao, C.-Y.~Wu, C.~Feichtenhofer, T.~Darrell, S.~Xie. A ConvNet
+for the 2020s. \emph{CVPR}, 2022. arXiv:2201.03545.
+\bibitem{touvron2021deit} H.~Touvron et al. Training Data-Efficient Image Transformers \&
+Distillation through Attention. \emph{ICML}, 2021. arXiv:2012.12877.
+\bibitem{steiner2022howtotrain} A.~Steiner et al. How to Train Your ViT? Data, Augmentation, and
+Regularization in Vision Transformers. \emph{TMLR}, 2022. arXiv:2106.10270.
+\bibitem{raghu2021vitsee} M.~Raghu, T.~Unterthiner, S.~Kornblith, C.~Zhang, A.~Dosovitskiy. Do Vision
+Transformers See Like Convolutional Neural Networks? \emph{NeurIPS}, 2021. arXiv:2108.08810.
+\bibitem{krizhevsky2009cifar} A.~Krizhevsky. Learning Multiple Layers of Features from Tiny Images.
+Technical report, University of Toronto, 2009.
+\bibitem{selvaraju2017gradcam} R.~R.~Selvaraju et al. Grad-CAM: Visual Explanations from Deep
+Networks via Gradient-Based Localization. \emph{ICCV}, 2017. arXiv:1610.02391.
+\bibitem{abnar2020rollout} S.~Abnar, W.~Zuidema. Quantifying Attention Flow in Transformers.
+\emph{ACL}, 2020. arXiv:2005.00928.
+\bibitem{wightman2019timm} R.~Wightman. PyTorch Image Models.
+\url{https://github.com/huggingface/pytorch-image-models}, 2019.
+\bibitem{wightman2021resnetstrikes} R.~Wightman, H.~Touvron, H.~J\'egou. ResNet Strikes Back: An
+Improved Training Procedure in timm. arXiv:2110.00476, 2021.
+\bibitem{loshchilov2019adamw} I.~Loshchilov, F.~Hutter. Decoupled Weight Decay Regularization.
+\emph{ICLR}, 2019. arXiv:1711.05101.
+\bibitem{loshchilov2017sgdr} I.~Loshchilov, F.~Hutter. SGDR: Stochastic Gradient Descent with Warm
+Restarts. \emph{ICLR}, 2017. arXiv:1608.03983.
+\bibitem{cubuk2020randaugment} E.~D.~Cubuk, B.~Zoph, J.~Shlens, Q.~V.~Le. RandAugment: Practical
+Automated Data Augmentation with a Reduced Search Space. \emph{CVPR Workshops}, 2020.
+arXiv:1909.13719.
+\bibitem{hendrycks2019robustness} D.~Hendrycks, T.~Dietterich. Benchmarking Neural Network Robustness
+to Common Corruptions and Perturbations. \emph{ICLR}, 2019. arXiv:1903.12261.
+\bibitem{geirhos2019texture} R.~Geirhos et al. ImageNet-Trained CNNs Are Biased towards Texture;
+Increasing Shape Bias Improves Accuracy and Robustness. \emph{ICLR}, 2019. arXiv:1811.12231.
+\end{thebibliography}
+
+\end{document}
